@@ -1,25 +1,25 @@
-//学习
 //参照网上的例子（python写的），用JS改写，目的是练习JS
+const test_grid1 = "003020600900305001001806400008102900700000008006708200002609500800203009005010300";
+const test_grid2 = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......";
+
 const Cols = "123456789";
 const Rows = "ABCDEFGHI";
 
-const Cross = (a, b) => {
+const Cross = (A, B) => {
     let arr = [];
-    for (let e1 of a) {
-        for (let e2 of b) {
-            arr.push(e1 + e2)
-        }
+    for (let a of A) {
+        for (let b of B)
+            arr.push(a + b)
     }
     return arr
 }
 
-const TwoArr_To_Obj = (arr1, arr2) => {     //注意两个必须长度一样
+const TwoArr_To_Obj = (arr1, arr2) => {     //注意两个长度一样
     let obj = {};
     arr1.forEach((e, index) => obj[e] = arr2[index]);
     return obj;
 }
 
-const Str_To_Arr = (str) => Array.prototype.slice.call(str);
 
 const Squares = Cross(Rows, Cols);
 const UnitArr = [];
@@ -45,9 +45,8 @@ Squares.forEach(e => Peers[e] = [...new Set(Units[e].flat().filter(a => a !== e)
 const Parse_Sudoku = (str_sudoku) => {
     let obj = {};
     Squares.forEach(e => obj[e] = Cols);
-    //let SudokuOfArr = Str_To_Arr(str_sudoku);
     let SudokuOfObj = TwoArr_To_Obj(Squares, str_sudoku);
-    for (let i of Object.keys(SudokuOfObj)) {
+    for (let i of Squares) {
         let v = SudokuOfObj[i]
         if (Cols.includes(v) && !MyAssign(obj, i, v)) {
             return false
@@ -60,7 +59,7 @@ const MyAssign = (obj, key, value) => {
     //从obj[key]中删除除了value以外的所有值，因为value是唯一的值
     //如果在过程中发现矛盾，则返回false
     let others = obj[key].replace(value, '');
-    let str_arr = Str_To_Arr(others);
+    let str_arr = [...others];
     if (str_arr.every(n => eliminate(obj, key, n))) {
         return obj
     } else {
@@ -115,18 +114,13 @@ const eliminate = (obj, key, num) => {
 
 }
 
-const test = '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
-let ready = Parse_Sudoku(test)
-//以上代码已测试通过
-
 const Solve_Sudoku = str => {
     return Search_Sudoku(Parse_Sudoku(str))
 }
 
 const Search_Sudoku = (obj) => {
-    if (obj === false) {
+    if (!obj)
         return false
-    }
     if (Squares.every(e => obj[e].length === 1)) {    //全部解决返回
         return obj
     }
@@ -137,18 +131,11 @@ const Search_Sudoku = (obj) => {
     Arr_temp.sort((x, y) => x[1] - y[1]);
     let key = Arr_temp[0][0];
     for (let num of obj[key]) {
-        Search_Sudoku(MyAssign(Object.assign({}, obj), key, num))
-    }
-
-}
-const Some_Result = f => {
-    if (f !== false) {
-        return f
+        let result = Search_Sudoku(MyAssign(Object.assign({}, obj), key, num))
+        if (result) return result
     }
     return false
 }
-
-//暂时只能解如下字符串形式的数独
 
 //以下代码将题目和答案输出在浏览器上面
 const Show_In_Exp = (str_sudoku) => {
@@ -159,10 +146,14 @@ const Show_In_Exp = (str_sudoku) => {
         }
     }
     document.writeln("---------------------<br/>");
-
 }
 
-Show_In_Exp(test);
-i = Solve_Sudoku(test)
-str = i.tostring
-Show_In_Exp(str);
+Show_In_Exp(test_grid1);
+let answer = Solve_Sudoku(test_grid1);
+if (answer) {
+    Answer_Str = Object.values(answer).join('');
+    Show_In_Exp(Answer_Str);
+} else {
+    document.writeln("No Answer")
+}
+//以上代码已调试通过
